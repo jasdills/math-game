@@ -6,7 +6,7 @@ const game = new Phaser.Game(800, 600, Phaser.AUTO, 'game-container', {
 
 let questionText, answerA, answerB, answerC;
 let correctAnswer, score = 0, scoreText;
-let timer, timeLeft = 15, timerText;
+let timer, timeLeft = 30, timerText;
 let rocket, planet;
 let correctCount = 0;
 
@@ -44,25 +44,25 @@ function update() {
 }
 
 function generateQuestion() {
-    let questionType = Phaser.Math.between(1, 3); // Randomly choose a type
-    let num1 = Phaser.Math.between(10, 50);
-    let num2 = Phaser.Math.between(1, 50);
+    let questionType = Phaser.Math.between(1, 2); // 1 = addition, 2 = subtraction
+    let num1, num2;
 
-    if (questionText) questionText.destroy();
-
-    if (questionType === 1) { 
+    if (questionType === 1) { // Addition
+        num1 = Phaser.Math.between(10, 50);
+        num2 = Phaser.Math.between(1, 50);
         correctAnswer = num1 + num2;
         questionText = game.add.text(250, 200, `${num1} + ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
-    } else if (questionType === 2) { 
+    } else { // Subtraction (Ensure no negative answers)
+        num1 = Phaser.Math.between(10, 50);
+        num2 = Phaser.Math.between(1, num1); // num2 is always smaller than num1
         correctAnswer = num1 - num2;
         questionText = game.add.text(250, 200, `${num1} - ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
-    } else { 
-        correctAnswer = (num1 % 2 === 0) ? "Even" : "Odd";
-        questionText = game.add.text(250, 200, `Is ${num1} Even or Odd?`, { fontSize: "28px", fill: "#fff" });
     }
 
     let wrongAnswer1 = correctAnswer + Phaser.Math.between(1, 5);
     let wrongAnswer2 = correctAnswer - Phaser.Math.between(1, 5);
+    if (wrongAnswer2 < 0) wrongAnswer2 = correctAnswer + Phaser.Math.between(2, 6); // Ensure no negative wrong answer
+
     let answers = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer1, wrongAnswer2]);
 
     if (answerA) answerA.destroy();
@@ -98,7 +98,7 @@ function checkAnswer(isCorrect) {
         alert("❌ Wrong! Try again.");
     }
     scoreText.setText(`Score: ${score}`);
-    timeLeft = 15;  // Reset timer
+    timeLeft = 30;  // Reset timer
     generateQuestion();
 }
 
@@ -108,11 +108,12 @@ function startTimer() {
         timerText.setText(`Time: ${timeLeft}s`);
         if (timeLeft <= 0) {
             alert("⏳ Time's up! Mission failed.");
-            timeLeft = 15;
+            timeLeft = 30;
             generateQuestion();
         }
     }, this);
 }
+
 
 
 
