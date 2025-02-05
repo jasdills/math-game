@@ -57,24 +57,23 @@ function generateQuestion() {
         questionText = game.add.text(250, 200, `Is ${num1} Even or Odd?`, { fontSize: "28px", fill: "#fff" });
     }
 
-    let wrongAnswer1 = correctAnswer + Phaser.Math.between(1, 5);
-    let wrongAnswer2 = correctAnswer - Phaser.Math.between(1, 5);
+    let wrongAnswer1 = Phaser.Math.between(1, 100);
+    let wrongAnswer2 = Phaser.Math.between(1, 100);
     let answers = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer1, wrongAnswer2]);
 
     if (answerA) answerA.destroy();
     if (answerB) answerB.destroy();
     if (answerC) answerC.destroy();
 
-    answerA = createAnswer(300, 300, answers[0]);
+    answerA = createAnswer(250, 300, answers[0]);
     answerB = createAnswer(450, 300, answers[1]);
-    answerC = createAnswer(600, 300, answers[2]);
+    answerC = createAnswer(650, 300, answers[2]);
 }
 
 function createAnswer(x, y, value) {
-    let answer = game.add.text(x, y, value, { fontSize: "32px", fill: "#0f0" });
-    answer.setInteractive();
+    let answer = game.add.text(x, y, value.toString(), { fontSize: "32px", fill: "#0f0" });
     answer.inputEnabled = true;
-    answer.events.onInputDown.add(() => checkAnswer(value === correctAnswer));
+    answer.events.onInputDown.add(() => checkAnswer(value === correctAnswer), this);
     return answer;
 }
 
@@ -108,5 +107,6 @@ function startTimer() {
         }
     });
 }
+
 
 
