@@ -1,65 +1,80 @@
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
-
-const game = new Phaser.Game(config);
+const game = new Phaser.Game(800, 600, Phaser.AUTO, 'game-container', {
+    preload: preload,
+    create: create,
+    update: update
+});
 
 let questionText, answerA, answerB;
 let correctAnswer, score = 0, scoreText;
+let timer, timeLeft = 10, timerText;
 
 function preload() {
-    // Load assets here if needed
+    game.load.image('background', 'assets/space-bg.jpg'); // Optional space background
 }
 
 function create() {
-    this.add.text(300, 50, "Math Game", { fontSize: "32px", fill: "#fff" });
+    game.add.image(0, 0, 'background');
 
-    scoreText = this.add.text(600, 50, `Score: ${score}`, { fontSize: "24px", fill: "#fff" });
+    game.add.text(250, 50, "🚀 Space Math Adventure 🚀", { fontSize: "28px", fill: "#fff" });
 
-    generateQuestion(this);
+    scoreText = game.add.text(600, 50, `Score: ${score}`, { fontSize: "24px", fill: "#fff" });
+
+    timerText = game.add.text(50, 50, `Time: ${timeLeft}s`, { fontSize: "24px", fill: "#fff" });
+
+    generateQuestion();
+    startTimer();
 }
 
-function update() {
-    // Game logic updates here (optional)
-}
+function update() {}
 
-function generateQuestion(scene) {
-    let num1 = Phaser.Math.Between(1, 10);
-    let num2 = Phaser.Math.Between(1, 10);
-    correctAnswer = num1 + num2;
+function generateQuestion() {
+    let num1 = Phaser.Math.between(10, 50);
+    let num2 = Phaser.Math.between(1, 50);
+    let operation = Phaser.Math.between(0, 1) === 0 ? '+' : '-';
+
+    correctAnswer = operation === '+' ? num1 + num2 : num1 - num2;
 
     if (questionText) questionText.destroy();
-    questionText = scene.add.text(300, 150, `What is ${num1} + ${num2}?`, { fontSize: "24px", fill: "#fff" });
+    questionText = game.add.text(300, 200, `${num1} ${operation} ${num2} = ?`, { fontSize: "32px", fill: "#fff" });
 
-    let wrongAnswer = correctAnswer + Phaser.Math.Between(1, 3);
-    let positions = Phaser.Utils.Array.Shuffle([correctAnswer, wrongAnswer]);
+    let wrongAnswer = correctAnswer + Phaser.Math.between(1, 5);
+    let positions = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer]);
 
     if (answerA) answerA.destroy();
     if (answerB) answerB.destroy();
 
-    answerA = scene.add.text(300, 250, positions[0], { fontSize: "24px", fill: "#0f0" })
+    answerA = game.add.text(300, 300, positions[0], { fontSize: "32px", fill: "#0f0" })
         .setInteractive()
-        .on('pointerdown', () => checkAnswer(positions[0] === correctAnswer, scene));
+        .inputEnabled = true;
+    answerA.events.onInputDown.add(() => checkAnswer(positions[0] === correctAnswer));
 
-    answerB = scene.add.text(400, 250, positions[1], { fontSize: "24px", fill: "#f00" })
+    answerB = game.add.text(500, 300, positions[1], { fontSize: "32px", fill: "#f00" })
         .setInteractive()
-        .on('pointerdown', () => checkAnswer(positions[1] === correctAnswer, scene));
+        .inputEnabled = true;
+    answerB.events.onInputDown.add(() => checkAnswer(positions[1] === correctAnswer));
 }
 
-function checkAnswer(isCorrect, scene) {
+function checkAnswer(isCorrect) {
     if (isCorrect) {
         score += 10;
-        alert("Correct!");
+        alert("✅ Correct!");
     } else {
-        alert("Wrong! Try again.");
+        alert("❌ Wrong! Try again.");
     }
     scoreText.setText(`Score: ${score}`);
-    generateQuestion(scene);
+    timeLeft = 10;  // Reset timer
+    generateQuestion();
 }
+
+function startTimer() {
+    timer = game.time.events.loop(Phaser.Timer.SECOND, () => {
+        timeLeft--;
+        timerText.setText(`Time: ${timeLeft}s`);
+        if (timeLeft <= 0) {
+            alert("⏳ Time's up! Try again.");
+            timeLeft = 10;
+            generateQuestion();
+        }
+    });
+}
+
