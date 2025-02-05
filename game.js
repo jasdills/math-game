@@ -4,14 +4,16 @@ const game = new Phaser.Game(800, 600, Phaser.AUTO, 'game-container', {
     update: update
 });
 
-let questionText, answerA, answerB;
+let questionText, answerA, answerB, answerC;
 let correctAnswer, score = 0, scoreText;
 let timer, timeLeft = 15, timerText;
-let rocket;
+let rocket, planet;
+let correctCount = 0;
 
 function preload() {
     game.load.image('space', 'assets/space-bg.jpg');  // Background
     game.load.image('rocket', 'assets/rocket.png');   // Rocket
+    game.load.image('planet', 'assets/planet.png');   // Planet
 }
 
 function create() {
@@ -20,7 +22,10 @@ function create() {
     rocket = game.add.sprite(400, 500, 'rocket');
     rocket.scale.setTo(0.2, 0.2);
 
-    game.add.text(250, 50, "🚀 Astro Math Mission 🚀", { fontSize: "28px", fill: "#fff" });
+    planet = game.add.sprite(400, 100, 'planet');
+    planet.scale.setTo(0.3, 0.3);
+
+    game.add.text(220, 30, "🚀 Astro Math Mission 🚀", { fontSize: "28px", fill: "#fff" });
 
     scoreText = game.add.text(600, 50, `Score: ${score}`, { fontSize: "24px", fill: "#fff" });
 
@@ -31,7 +36,7 @@ function create() {
 }
 
 function update() {
-    rocket.y -= 0.1; // Slow rocket movement upward
+    rocket.y -= 0.05; // Slow rocket movement upward
 }
 
 function generateQuestion() {
@@ -39,38 +44,50 @@ function generateQuestion() {
     let num1 = Phaser.Math.between(10, 50);
     let num2 = Phaser.Math.between(1, 50);
 
-    if (questionType === 1) {
+    if (questionText) questionText.destroy();
+
+    if (questionType === 1) { 
         correctAnswer = num1 + num2;
-        questionText = game.add.text(300, 200, `What is ${num1} + ${num2}?`, { fontSize: "28px", fill: "#fff" });
-    } else if (questionType === 2) {
+        questionText = game.add.text(250, 200, `${num1} + ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
+    } else if (questionType === 2) { 
         correctAnswer = num1 - num2;
-        questionText = game.add.text(300, 200, `What is ${num1} - ${num2}?`, { fontSize: "28px", fill: "#fff" });
-    } else {
-        correctAnswer = num1 % 2 === 0 ? "Even" : "Odd";
-        questionText = game.add.text(300, 200, `Is ${num1} Even or Odd?`, { fontSize: "28px", fill: "#fff" });
+        questionText = game.add.text(250, 200, `${num1} - ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
+    } else { 
+        correctAnswer = (num1 % 2 === 0) ? "Even" : "Odd";
+        questionText = game.add.text(250, 200, `Is ${num1} Even or Odd?`, { fontSize: "28px", fill: "#fff" });
     }
 
-    let wrongAnswer = correctAnswer + Phaser.Math.between(1, 5);
-    let positions = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer]);
+    let wrongAnswer1 = correctAnswer + Phaser.Math.between(1, 5);
+    let wrongAnswer2 = correctAnswer - Phaser.Math.between(1, 5);
+    let answers = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer1, wrongAnswer2]);
 
     if (answerA) answerA.destroy();
     if (answerB) answerB.destroy();
+    if (answerC) answerC.destroy();
 
-    answerA = game.add.text(300, 300, positions[0], { fontSize: "32px", fill: "#0f0" })
-        .setInteractive()
-        .inputEnabled = true;
-    answerA.events.onInputDown.add(() => checkAnswer(positions[0] === correctAnswer));
+    answerA = createAnswer(300, 300, answers[0]);
+    answerB = createAnswer(450, 300, answers[1]);
+    answerC = createAnswer(600, 300, answers[2]);
+}
 
-    answerB = game.add.text(500, 300, positions[1], { fontSize: "32px", fill: "#f00" })
-        .setInteractive()
-        .inputEnabled = true;
-    answerB.events.onInputDown.add(() => checkAnswer(positions[1] === correctAnswer));
+function createAnswer(x, y, value) {
+    let answer = game.add.text(x, y, value, { fontSize: "32px", fill: "#0f0" });
+    answer.setInteractive();
+    answer.inputEnabled = true;
+    answer.events.onInputDown.add(() => checkAnswer(value === correctAnswer));
+    return answer;
 }
 
 function checkAnswer(isCorrect) {
     if (isCorrect) {
         score += 10;
+        correctCount++;
         rocket.y -= 50; // Move rocket upward when correct
+        if (correctCount >= 5) {
+            alert("🌎 You've reached a new planet!");
+            correctCount = 0;
+            rocket.y = 500; // Reset position
+        }
         alert("✅ Correct!");
     } else {
         alert("❌ Wrong! Try again.");
