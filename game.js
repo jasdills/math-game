@@ -20,9 +20,11 @@ function create() {
     game.add.image(0, 0, 'space');
 
     rocket = game.add.sprite(400, 500, 'rocket');
+    rocket.anchor.setTo(0.5, 0.5);
     rocket.scale.setTo(0.2, 0.2);
 
     planet = game.add.sprite(400, 100, 'planet');
+    planet.anchor.setTo(0.5, 0.5);
     planet.scale.setTo(0.3, 0.3);
 
     game.add.text(220, 30, "🚀 Astro Math Mission 🚀", { fontSize: "28px", fill: "#fff" });
@@ -36,7 +38,9 @@ function create() {
 }
 
 function update() {
-    rocket.y -= 0.05; // Slow rocket movement upward
+    if (rocket.y > 150) { // Prevent rocket from going off screen
+        rocket.y -= 0.05; 
+    }
 }
 
 function generateQuestion() {
@@ -57,8 +61,8 @@ function generateQuestion() {
         questionText = game.add.text(250, 200, `Is ${num1} Even or Odd?`, { fontSize: "28px", fill: "#fff" });
     }
 
-    let wrongAnswer1 = Phaser.Math.between(1, 100);
-    let wrongAnswer2 = Phaser.Math.between(1, 100);
+    let wrongAnswer1 = correctAnswer + Phaser.Math.between(1, 5);
+    let wrongAnswer2 = correctAnswer - Phaser.Math.between(1, 5);
     let answers = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer1, wrongAnswer2]);
 
     if (answerA) answerA.destroy();
@@ -73,7 +77,9 @@ function generateQuestion() {
 function createAnswer(x, y, value) {
     let answer = game.add.text(x, y, value.toString(), { fontSize: "32px", fill: "#0f0" });
     answer.inputEnabled = true;
-    answer.events.onInputDown.add(() => checkAnswer(value === correctAnswer), this);
+    answer.events.onInputDown.add(function() {
+        checkAnswer(value === correctAnswer);
+    }, this);
     return answer;
 }
 
@@ -97,7 +103,7 @@ function checkAnswer(isCorrect) {
 }
 
 function startTimer() {
-    timer = game.time.events.loop(Phaser.Timer.SECOND, () => {
+    timer = game.time.events.loop(Phaser.Timer.SECOND, function() {
         timeLeft--;
         timerText.setText(`Time: ${timeLeft}s`);
         if (timeLeft <= 0) {
@@ -105,8 +111,9 @@ function startTimer() {
             timeLeft = 15;
             generateQuestion();
         }
-    });
+    }, this);
 }
+
 
 
 
