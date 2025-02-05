@@ -52,16 +52,16 @@ function generateQuestion() {
         num2 = Phaser.Math.between(1, 50);
         correctAnswer = num1 + num2;
         questionText = game.add.text(250, 200, `${num1} + ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
-    } else { // Subtraction (Ensure no negative answers)
+    } else { // Subtraction (Ensuring no negative results)
         num1 = Phaser.Math.between(10, 50);
-        num2 = Phaser.Math.between(1, num1); // num2 is always smaller than num1
+        num2 = Phaser.Math.between(1, num1); // Ensure num2 is always smaller than num1
         correctAnswer = num1 - num2;
         questionText = game.add.text(250, 200, `${num1} - ${num2} = ?`, { fontSize: "28px", fill: "#fff" });
     }
 
     let wrongAnswer1 = correctAnswer + Phaser.Math.between(1, 5);
     let wrongAnswer2 = correctAnswer - Phaser.Math.between(1, 5);
-    if (wrongAnswer2 < 0) wrongAnswer2 = correctAnswer + Phaser.Math.between(2, 6); // Ensure no negative wrong answer
+    if (wrongAnswer2 < 0) wrongAnswer2 = correctAnswer + Phaser.Math.between(2, 6); // No negative wrong answers
 
     let answers = Phaser.ArrayUtils.shuffle([correctAnswer, wrongAnswer1, wrongAnswer2]);
 
@@ -98,7 +98,7 @@ function checkAnswer(isCorrect) {
         alert("❌ Wrong! Try again.");
     }
     scoreText.setText(`Score: ${score}`);
-    timeLeft = 30;  // Reset timer
+    timeLeft = 30;  // Reset timer to 30 seconds
     generateQuestion();
 }
 
@@ -108,7 +108,7 @@ function startTimer() {
         timerText.setText(`Time: ${timeLeft}s`);
         if (timeLeft <= 0) {
             alert("⏳ Time's up! Mission failed.");
-            timeLeft = 30;
+            timeLeft = 30; // Reset to 30 seconds
             generateQuestion();
         }
     }, this);
